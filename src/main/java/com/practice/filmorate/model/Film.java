@@ -29,12 +29,4 @@ public class Film {
     @Positive
     int duration;
 
-    public void setReleaseDate(LocalDate releaseDate) {
-        if (releaseDate.isBefore(LocalDate.of(1895, 12, 28))) {
-            String message = "Дата релиза не должна быть раньше 28 декабря 1895 года";
-            log.error(message);
-            throw new IllegalArgumentException(message);
-        }
-        this.releaseDate = releaseDate;
-    }
 }
