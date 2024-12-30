@@ -1,60 +1,57 @@
 package com.practice.filmorate.controller;
 
 import com.practice.filmorate.model.Film;
+import com.practice.filmorate.service.FilmService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/films")
 public class FilmController {
+    private final FilmService filmService;
 
-    private final Map<Integer, Film> films = new HashMap<>();
-    private int uniqueId = 1;
+    // КОНСТРУКТОР
+    @Autowired
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
+    }
 
-    // Новая константа - минимальная допустимая дата релиза
-    private static final LocalDate MIN_RELEASE_DATE = LocalDate.of(1895, 12, 28);
-
+    // GET - СПИСОК ВСЕХ ФИЛЬМОВ
     @GetMapping
-    public List<Film> get() {
-        return new ArrayList<>(films.values());
+    public Collection<Film> findAll() {
+        return filmService.findAll();
     }
 
+    // GET - СПИСОК ПОПУЛЯРНЫХ ФИЛЬМОВ
+    @GetMapping("/popular?count={count}")
+    public List<Film> findAllPopular(@PathVariable int count) {
+        return filmService.findAllPopular(count);
+    }
+
+    // POST - НОВЫЙ ФИЛЬМ
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     public Film create(@Valid @RequestBody Film film) {
-        validateReleaseDate(film.getReleaseDate());     // метод-проверка, всё ли ок с датой релиза
-        film.setId(getUniqueId());
-        films.put(film.getId(), film);
-        return film;
+        return filmService.create(film);
     }
 
+    // PUT - ОБНОВИТЬ ДАННЫЕ ФИЛЬМА
     @PutMapping
-    @ResponseStatus(HttpStatus.OK)
     public Film update(@Valid @RequestBody Film film) {
-        if (!films.containsKey(film.getId())) {
-            throw new IllegalArgumentException("Фильм с данным id (" + film.getId() + ") не найден");
-        }
-        validateReleaseDate(film.getReleaseDate());     // метод-проверка, всё ли ок с датой релиза
-        films.put(film.getId(), film);
-        return film;
+        return filmService.update(film);
     }
 
-    private int getUniqueId() {
-        return uniqueId++;
+    // PUT - ПООЛЬЗОВАТЕЛЬ СТАВИТ ЛАЙК ФИЛЬМУ
+    @PutMapping("/{id}/like/{userId}")
+    public void addLike(@PathVariable int id, @PathVariable int userId) {
+        filmService.addLike(id, userId);
     }
 
-    private void validateReleaseDate(LocalDate releaseDate) {
-        // если дата релиза РАНЬШЕ допустимой - исключение
-        if (releaseDate.isBefore(MIN_RELEASE_DATE)) {
-            throw new IllegalArgumentException("Дата релиза не должна быть раньше 28 декабря 1895 года");
-        }
+    // DELETE - ПОЛЬЗОВАТЕЛЬ УБИРАЕТ ЛАЙК С ФИЛЬМА
+    @DeleteMapping("/{id}/like/{userId}")
+    public void removeLike(@PathVariable int id, @PathVariable int userId) {
+        filmService.removeLike(id, userId);
     }
 
 }

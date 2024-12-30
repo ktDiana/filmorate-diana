@@ -1,51 +1,76 @@
 package com.practice.filmorate.controller;
 
-import com.practice.filmorate.model.Film;
 import com.practice.filmorate.model.User;
+import com.practice.filmorate.service.UserService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import java.util.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-
+@RestController
 @RequestMapping("/users")
 public class UserController {
+    private final UserService userService;
 
-    private final Map<Integer, User> users = new HashMap<>();
-    private int uniqueId = 1;
+    // КОНСТРУКТОР
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
+    // GET - СПИСОК ВСЕХ ПОЛЬЗОВАТЕЛЕЙ
     @GetMapping
-    public List<User> get() {
-        return new ArrayList<>(users.values());
+    public Collection<User> findAll() {
+        return userService.findAll();
     }
 
+    // GET - СПИСОК ДРУЗЕЙ (ПО id ПОЛЬЗОВАТЕЛЯ)
+    @GetMapping("/{id}/friends")
+    public List<User> findAllFriends(@PathVariable int id) {
+        return userService.findAllFriends(id);
+    }
+
+    // GET - СПИСОК ОБЩИХ ДРУЗЕЙ С ДРУГИМ ПОЛЬЗОВАТЕЛЕМ
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> findCommonFriends(@PathVariable int id, @PathVariable int otherId) {
+        return userService.findCommonFriends(id, otherId);
+    }
+
+    // POST - НОВЫЙ ПОЛЬЗОВАТЕЛЬ
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     public User create(@Valid @RequestBody User user) {
-        user.setId(getUniqueId());
-        if (user.getName() == null || user.getName().isEmpty()) {
-            user.setName(user.getLogin());
-        }
-        users.put(user.getId(), user);
-        return user;
+        return userService.create(user);
     }
 
+    // PUT - ОБНОВИТЬ ДАННЫЕ ПОЛЬЗОВАТЕЛЯ
     @PutMapping
-    @ResponseStatus(HttpStatus.OK)
     public User update(@Valid @RequestBody User user) {
-        if (!users.containsKey(user.getId())) {
-            throw new IllegalArgumentException("Пользователя с данным id (" + user.getId() + ") нет");
-        }
-        users.put(user.getId(), user);
-        return user;
+        return userService.update(user);
     }
 
-    private int getUniqueId() {
-        return uniqueId++;
+    // PUT - В СПИСОК ДРУЗЕЙ ПОЛЬЗОВАТЕЛЯ
+    @PutMapping("/{id}/friends/{friendId}")
+    public User addNewFriend(@PathVariable int id, @PathVariable int friendId) {
+        return userService.addNewFriend(id, friendId);
     }
+
+    // DELETE - ПОЛЬЗОВАТЕЛЯ ПО id
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable int id) {
+        userService.delete(id);
+    }
+
+    // DELETE - ПОЛЬЗОВАТЕЛЯ ПО email
+    @DeleteMapping
+    public void delete(@RequestBody User user) {
+        userService.delete(user);
+    }
+
+    // DELETE - ИЗ СПИСКА ДРУЗЕЙ ПОЛЬЗОВАТЕЛЯ
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable int id, @PathVariable int friendId) {
+        userService.deleteFriend(id, friendId);
+    }
+
 }
 
