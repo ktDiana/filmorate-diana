@@ -1,6 +1,7 @@
 package com.practice.filmorate.service;
 
 import com.practice.filmorate.exception.FilmNotFoundException;
+import com.practice.filmorate.exception.IncorrectParameterException;
 import com.practice.filmorate.exception.UserNotFoundException;
 import com.practice.filmorate.model.Film;
 import com.practice.filmorate.storage.FilmStorage;
@@ -9,10 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+
+import java.util.*;
 
 // FilmService, который будет отвечать за операции с фильмами, — добавление и удаление лайка, вывод 10 наиболее
 // популярных фильмов по количеству лайков. Пусть пока каждый пользователь может поставить лайк фильму только один раз.
@@ -24,7 +23,6 @@ public class FilmService {
 
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
-    private final HashMap<Integer, Film> films = new HashMap<>();
 
     // КОНСТРУКТОР
     @Autowired
@@ -45,11 +43,20 @@ public class FilmService {
     }
 
     // GET - СПИСОК ПОПУЛЯРНЫХ ФИЛЬМОВ
+    // Реализацию делала не сама. Нужно повторить Comparator/Comporable
+
     public List<Film> findAllPopular(int count) {
-        return filmStorage.findAll().stream()
-                .sorted((film1, film2) -> Integer.compare(film2.getLikes().size(), film1.getLikes().size()))
-                .limit(count)
-                .toList();
+        List<Film> allFilms = new ArrayList<>(filmStorage.findAll());
+        allFilms.sort(new Comparator<Film>() {
+            @Override
+            public int compare(Film film1, Film film2) {
+                return Integer.compare(film2.getLikes().size(), film1.getLikes().size());
+            }
+        });
+        if (count > allFilms.size()) {
+            count = allFilms.size();
+        }
+        return allFilms.subList(0, count);
     }
 
     // POST - НОВЫЙ ФИЛЬМ
@@ -68,9 +75,7 @@ public class FilmService {
                 .orElseThrow(() -> new FilmNotFoundException("Фильм с данным id (" + filmId + ") не найден"));
         userStorage.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь с данным id (" + userId + ") не найден"));
-        if (!film.getLikes().add(userId)) {
-            throw new IllegalStateException("Пользователь уже лайкал этот фильм");
-        }
+        film.getLikes().add(userId);
         return filmStorage.update(film);
     }
 
@@ -85,11 +90,7 @@ public class FilmService {
                 .orElseThrow(() -> new FilmNotFoundException("Фильм с данным id (" + filmId + ") не найден"));
         userStorage.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь с данным id (" + userId + ") не найден"));
-        if (!film.getLikes().remove(userId)) {
-            throw new IllegalStateException("Пользователь не ставил лайк этому фильму");
-        }
+        film.getLikes().remove(userId);
         return filmStorage.update(film);
     }
-
-
 }

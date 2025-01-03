@@ -22,7 +22,7 @@ import java.util.Optional;
 public class InMemoryUserStorage implements UserStorage {
 
     private final HashMap<Integer, User> users = new HashMap<>();
-    private int uniqueId = 0;
+    private int uniqueId = 1;
 
     @Override
     public Collection<User> findAll() {

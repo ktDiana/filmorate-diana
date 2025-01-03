@@ -1,6 +1,7 @@
 package com.practice.filmorate.service;
 
 import com.practice.filmorate.exception.FilmNotFoundException;
+import com.practice.filmorate.exception.IncorrectParameterException;
 import com.practice.filmorate.exception.UserNotFoundException;
 import com.practice.filmorate.model.Film;
 import com.practice.filmorate.model.User;
@@ -53,14 +54,19 @@ public class UserService {
 
     // GET - СПИСОК ОБЩИХ ДРУЗЕЙ С ДРУГИМ ПОЛЬЗОВАТЕЛЕМ
     public List<User> findCommonFriends(@PathVariable int id, @PathVariable int otherId) {
+        List<User> friendsOfUser1 = findAllFriends(id);
+        List<User> friendsOfUser2 = findAllFriends(otherId);
         List<User> commonFriends = new ArrayList<>();
-        for (int i = 0; i < findAllFriends(id).size(); i++) {
-            for (int j = 0; j < findAllFriends(otherId).size(); j++) {
-                commonFriends.add(findAllFriends(id).get(i));
+        for (User friend1 : friendsOfUser1) {
+            for (User friend2 : friendsOfUser2) {
+                if (friend1.getId() == friend2.getId()) {
+                    commonFriends.add(friend1);
+                }
             }
         }
         return commonFriends;
     }
+
 
     // POST - НОВЫЙ ПОЛЬЗОВАТЕЛЬ
     public User create(User user) {
@@ -74,16 +80,18 @@ public class UserService {
 
     // PUT - В СПИСОК ДРУЗЕЙ ПОЛЬЗОВАТЕЛЯ
     public User addNewFriend(int id, int friendId) {
-        log.info("Добавление нового друга для пользователя {}: {}", findById(id), findById(friendId));
+        log.info("Взаимное добавление нового друга для пользователя {}: {}", id, friendId);
         User user = userStorage.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь с данным id (" + id + ") не найден"));
-        userStorage.findById(friendId)
+        User friend = userStorage.findById(friendId)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь с данным id (" + friendId + ") не найден"));
-        if (!user.getFriends().add(friendId)) {
-            throw new IllegalStateException("Пользователь уже есть в списке друзей");
-        }
-        return userStorage.update(user);
+        user.getFriends().add(friendId);
+        friend.getFriends().add(id); // Взаимная дружба
+        userStorage.update(user);
+        userStorage.update(friend); // Обновляем и друга
+        return user;
     }
+
 
     // DELETE - ПОЛЬЗОВАТЕЛЯ ПО id
     public void delete(int id) {
@@ -96,9 +104,7 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("Пользователь с данным id (" + id + ") не найден"));
         userStorage.findById(friendId)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь с данным id (" + friendId + ") не найден"));
-        if (!user.getFriends().remove(friendId)) {
-            throw new IllegalStateException("Пользователя нет в списке друзей");
-        }
+        user.getFriends().remove(friendId);
         return userStorage.update(user);
     }
 }

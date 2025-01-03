@@ -1,6 +1,8 @@
 package com.practice.filmorate.controller;
 
 import com.practice.filmorate.exception.*;
+import jakarta.validation.ConstraintViolationException;
+import jakarta.validation.ValidationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -46,20 +48,29 @@ public class ExceptionsHandler {
         return new ExceptionResponse(e.getMessage());                   // "Ошибка в переданных параметрах"
     }
 
+    // В Spring Boot валидаторские ошибки (например, от @Valid) генерируют исключения, такие как MethodArgumentNotValidException
+    // или ConstraintViolationException. Эти исключения не будут обрабатываться методом handleServerError(), если для
+    // них не задан явный обработчик, т.е. они требуют своего обработчика.
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ExceptionResponse handleValidationExceptions(MethodArgumentNotValidException e) {
+        return new ExceptionResponse("Проверка валидации не пройдена");
+    }
+
+    // ConstraintViolationException выбрасывается:
+    // Нарушение ограничений в аннотациях @NotBlank, @Email, @Pattern, @PastOrPresent и других, если они указаны на
+    // уровне класса User.
+    // Обработка запросов, нарушающих ограничения.
+    @ExceptionHandler(ConstraintViolationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionResponse handleConstraintViolationExceptions(ConstraintViolationException e) {
+        return new ExceptionResponse(e.getMessage());
+    }
+
     @ExceptionHandler(Throwable.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ExceptionResponse handleServerError(Throwable e) {
         return new ExceptionResponse("Произошла непредвиденная ошибка");
-    }
-
-    // В Spring Boot валидаторские ошибки (например, от @Valid) генерируют исключения, такие как MethodArgumentNotValidException
-    // или ConstraintViolationException. Эти исключения не будут обрабатываться методом handleServerError(), если для
-    // них не задан явный обработчик, т.е. они требуют своего обработчика.
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ExceptionResponse handleValidationExceptions(MethodArgumentNotValidException ex) {
-        return new ExceptionResponse("Проверка валидации не пройдена");
     }
 }
 
