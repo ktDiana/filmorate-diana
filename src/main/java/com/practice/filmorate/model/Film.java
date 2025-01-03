@@ -5,15 +5,14 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Builder
 
 public class Film {
 
-    @Getter
     int id;
 
     @NotBlank
@@ -29,6 +28,6 @@ public class Film {
     @Positive
     int duration;
 
-    Set<Integer> likes;     // идентификаторы существующих пользователей
+    Set<Integer> likes = new HashSet<>();     // идентификаторы существующих пользователей
 
 }

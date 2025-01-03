@@ -5,15 +5,14 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data   // @EqualsAndHashCode, @Getter, @Setter, @RequiredArgsConstructor, @ToString
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Builder
 
 public class User {
 
-    @Getter
     int id;
 
     @NotBlank
@@ -30,9 +29,9 @@ public class User {
     @PastOrPresent(message = "Дата рождения не может быть в будущем")
     LocalDate birthday;
 
-    Set<Integer> friends;      // идентификаторы пользователей-друзей
+    Set<Integer> friends = new HashSet<>();      // идентификаторы пользователей-друзей
 
-    public String getName() {
+    public String setName() {
         return (name == null || name.isEmpty()) ? login : name.trim();     // тернарный оператор -> установка имени
     }
 

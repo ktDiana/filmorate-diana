@@ -1,7 +1,10 @@
 package com.practice.filmorate.storage.impl;
 
+import com.practice.filmorate.exception.IncorrectParameterException;
+import com.practice.filmorate.exception.UserNotFoundException;
 import com.practice.filmorate.model.User;
 import com.practice.filmorate.storage.UserStorage;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -14,6 +17,8 @@ import java.util.Optional;
 // зависимостей и передавать хранилища сервисам.
 
 @Component
+@Slf4j
+
 public class InMemoryUserStorage implements UserStorage {
 
     private final HashMap<Integer, User> users = new HashMap<>();
@@ -35,21 +40,12 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public Optional<User> findByEmail(String email) {
-        for (User user : users.values()) {
-            if (user.getEmail().equals(email)) {
-                return Optional.of(user);
-            }
-        }
-        return Optional.empty();
-    }
-
-    @Override
     public User create(User user) {
         user.setId(getUniqueId());
         if (user.getName() == null || user.getName().isEmpty()) {
             user.setName(user.getLogin());
         }
+        log.info("Создание нового пользователя: {}", user);
         users.put(user.getId(), user);
         return user;
     }
@@ -57,24 +53,20 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User update(User user) {
         if (!users.containsKey(user.getId())) {
-            throw new IllegalArgumentException("Пользователя с данным id (" + user.getId() + ") нет");
+            throw new UserNotFoundException("Пользователь с данным id (" + user.getId() + ") не найден");
         }
+        log.info("Обновление данных пользователя: {}", user);
         users.put(user.getId(), user);
         return user;
     }
 
     @Override
     public void delete(int id) {
-        users.remove(id);
-    }
-
-    @Override
-    public void delete(String email) {
-        for (User user : users.values()) {
-            if (user.getEmail().equals(email)) {
-                users.remove(user.getId());
-            }
+        if (id <= 0 || id >= users.size()) {
+            throw new IncorrectParameterException("Пользователь с данным id (" + id + ") не найден");
         }
+        log.info("Удаление пользователя: {}", findById(id));
+        users.remove(id);
     }
 
     public int getUniqueId() {

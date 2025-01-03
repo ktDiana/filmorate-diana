@@ -14,13 +14,10 @@ public interface UserStorage {
 
     Optional<User> findById(int id);
 
-    Optional<User> findByEmail(String email);
-
     User create(User user);
 
     User update(User user);
 
     void delete(int id);
 
-    void delete(String email);
 }

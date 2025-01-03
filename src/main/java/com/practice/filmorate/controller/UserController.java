@@ -24,6 +24,11 @@ public class UserController {
         return userService.findAll();
     }
 
+    // GET - КОНКРЕТНЫЙ ПОЛЬЗОВАТЕЛЬ (ПО id)
+    public Optional<User> findById(int id) {
+        return userService.findById(id);
+    }
+
     // GET - СПИСОК ДРУЗЕЙ (ПО id ПОЛЬЗОВАТЕЛЯ)
     @GetMapping("/{id}/friends")
     public List<User> findAllFriends(@PathVariable int id) {
@@ -60,16 +65,10 @@ public class UserController {
         userService.delete(id);
     }
 
-    // DELETE - ПОЛЬЗОВАТЕЛЯ ПО email
-    @DeleteMapping
-    public void delete(@RequestBody User user) {
-        userService.delete(user);
-    }
-
     // DELETE - ИЗ СПИСКА ДРУЗЕЙ ПОЛЬЗОВАТЕЛЯ
     @DeleteMapping("/{id}/friends/{friendId}")
-    public void deleteFriend(@PathVariable int id, @PathVariable int friendId) {
-        userService.deleteFriend(id, friendId);
+    public User deleteFriend(@PathVariable int id, @PathVariable int friendId) {
+        return userService.deleteFriend(id, friendId);
     }
 
 }

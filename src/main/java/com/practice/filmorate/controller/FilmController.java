@@ -24,6 +24,12 @@ public class FilmController {
         return filmService.findAll();
     }
 
+    // GET - КОНКРЕТНЫЙ ФИЛЬМ (ПО id)
+    @GetMapping("/{id}")
+    public Optional<Film> findById(@PathVariable int id) {
+        return filmService.findById(id);
+    }
+
     // GET - СПИСОК ПОПУЛЯРНЫХ ФИЛЬМОВ
     @GetMapping("/popular?count={count}")
     public List<Film> findAllPopular(@PathVariable int count) {
@@ -42,16 +48,21 @@ public class FilmController {
         return filmService.update(film);
     }
 
-    // PUT - ПООЛЬЗОВАТЕЛЬ СТАВИТ ЛАЙК ФИЛЬМУ
+    // PUT - ПОЛЬЗОВАТЕЛЬ СТАВИТ ЛАЙК ФИЛЬМУ
     @PutMapping("/{id}/like/{userId}")
-    public void addLike(@PathVariable int id, @PathVariable int userId) {
-        filmService.addLike(id, userId);
+    public Film addLike(@PathVariable int id, @PathVariable int userId) {
+        return filmService.addLike(id, userId);
+    }
+
+    // DELETE - ФИЛЬМ
+    @DeleteMapping("/{id}")
+    public void removeLike(@PathVariable int id) {
+        filmService.delete(id);
     }
 
     // DELETE - ПОЛЬЗОВАТЕЛЬ УБИРАЕТ ЛАЙК С ФИЛЬМА
     @DeleteMapping("/{id}/like/{userId}")
-    public void removeLike(@PathVariable int id, @PathVariable int userId) {
-        filmService.removeLike(id, userId);
+    public Film removeLike(@PathVariable int id, @PathVariable int userId) {
+        return filmService.removeLike(id, userId);
     }
-
 }
