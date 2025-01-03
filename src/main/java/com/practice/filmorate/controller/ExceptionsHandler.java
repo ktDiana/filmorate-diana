@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.stream.Collectors;
+
 @RestControllerAdvice
 public class ExceptionsHandler {
 
@@ -48,11 +50,8 @@ public class ExceptionsHandler {
         return new ExceptionResponse(e.getMessage());                   // "Ошибка в переданных параметрах"
     }
 
-    // В Spring Boot валидаторские ошибки (например, от @Valid) генерируют исключения, такие как MethodArgumentNotValidException
-    // или ConstraintViolationException. Эти исключения не будут обрабатываться методом handleServerError(), если для
-    // них не задан явный обработчик, т.е. они требуют своего обработчика.
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ExceptionResponse handleValidationExceptions(MethodArgumentNotValidException e) {
         return new ExceptionResponse("Проверка валидации не пройдена");
     }

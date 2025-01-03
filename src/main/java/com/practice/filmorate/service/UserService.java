@@ -100,11 +100,12 @@ public class UserService {
 
     // DELETE - ИЗ СПИСКА ДРУЗЕЙ ПОЛЬЗОВАТЕЛЯ
     public User deleteFriend(int id, int friendId) {
-        User user = userStorage.findById(id)
+        User currentUser = userStorage.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь с данным id (" + id + ") не найден"));
-        userStorage.findById(friendId)
+        User friendUser = userStorage.findById(friendId)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь с данным id (" + friendId + ") не найден"));
-        user.getFriends().remove(friendId);
-        return userStorage.update(user);
+        currentUser.getFriends().remove(friendId);
+        friendUser.getFriends().remove(id);
+        return userStorage.update(currentUser);
     }
 }
