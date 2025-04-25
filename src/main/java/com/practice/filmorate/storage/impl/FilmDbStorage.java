@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 // InMemoryFilmStorage и InMemoryUserStorage, имплементирующие новые интерфейсы, и перенесите туда всю логику хранения,
 // обновления и поиска объектов.
@@ -18,7 +19,7 @@ import java.util.*;
 @Component
 @Slf4j
 
-public class InMemoryFilmStorage implements FilmStorage {
+public class FilmDbStorage implements FilmStorage {
 
     private final Map<Integer, Film> films = new HashMap<>();
     private int uniqueId = 1;
@@ -33,12 +34,17 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Optional<Film> findById(int id) {
-        for (Film film : films.values()) {
-            if (film.getId() == id) {
-                return Optional.of(film);
-            }
+        return Optional.ofNullable(films.get(id));
+    }
+
+    public List<Film> findAllPopular(int count) {
+        if (count <= 0) {
+            return Collections.emptyList();
         }
-        return Optional.empty();
+        return findAll().stream()
+                .sorted((f1, f2) -> Integer.compare(f2.getLikes().size(), f1.getLikes().size()))
+                .limit(count)
+                .toList();
     }
 
     @Override
@@ -62,7 +68,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     }
 
     @Override
-    public void delete(int id) {
+    public void deleteFilm(int id) {
         if (!films.containsKey(id)) {
             throw new FilmNotFoundException("Фильм с данным id (" + id + ") не найден");
         }

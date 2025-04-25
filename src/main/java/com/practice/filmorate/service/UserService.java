@@ -1,19 +1,15 @@
 package com.practice.filmorate.service;
 
 import com.practice.filmorate.exception.FilmNotFoundException;
-import com.practice.filmorate.exception.IncorrectParameterException;
 import com.practice.filmorate.exception.UserNotFoundException;
-import com.practice.filmorate.model.Film;
 import com.practice.filmorate.model.User;
 import com.practice.filmorate.storage.UserStorage;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+
+import java.util.*;
 
 // UserService, который будет отвечать за такие операции с пользователями, как добавление в друзья, удаление из друзей,
 // вывод списка общих друзей. Пока пользователям не надо одобрять заявки в друзья — добавляем сразу. То есть если Лена
@@ -21,15 +17,11 @@ import java.util.Optional;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 
 public class UserService {
-    public UserStorage userStorage;
 
-    // КОНСТРУКТОР
-    @Autowired
-    public UserService(UserStorage userStorage) {
-        this.userStorage = userStorage;
-    }
+    public final UserStorage userStorage;
 
     // GET - СПИСОК ВСЕХ ПОЛЬЗОВАТЕЛЕЙ
     public Collection<User> findAll() {
@@ -37,14 +29,14 @@ public class UserService {
     }
 
     // GET - КОНКРЕТНЫЙ ПОЛЬЗОВАТЕЛЬ (ПО id)
-    public Optional<User> findById(int id) {
-        return userStorage.findById(id);
+    public User findById(int id) {
+        return userStorage.findById(id)
+                .orElseThrow(() -> new FilmNotFoundException("Пользователь с данным id (" + id + ") не найден"));
     }
 
     // GET - СПИСОК ДРУЗЕЙ (ПО id ПОЛЬЗОВАТЕЛЯ)
     public List<User> findAllFriends(int id) {
-        User user = userStorage.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь с данным id (" + id + ") не найден"));
+        User user = findById(id);
         return user.getFriends().stream()
                 // переводим айди друзей в объекты друзей
                 .map(friendId -> userStorage.findById(friendId)
@@ -53,20 +45,12 @@ public class UserService {
     }
 
     // GET - СПИСОК ОБЩИХ ДРУЗЕЙ С ДРУГИМ ПОЛЬЗОВАТЕЛЕМ
-    public List<User> findCommonFriends(@PathVariable int id, @PathVariable int otherId) {
-        List<User> friendsOfUser1 = findAllFriends(id);
-        List<User> friendsOfUser2 = findAllFriends(otherId);
-        List<User> commonFriends = new ArrayList<>();
-        for (User friend1 : friendsOfUser1) {
-            for (User friend2 : friendsOfUser2) {
-                if (friend1.getId() == friend2.getId()) {
-                    commonFriends.add(friend1);
-                }
-            }
-        }
-        return commonFriends;
+    public Set<User> findCommonFriends(int id, int otherId) {
+        Set<User> friendsOfUser1 = new HashSet<>(findAllFriends(id));
+        Set<User> friendsOfUser2 = new HashSet<>(findAllFriends(otherId));
+        friendsOfUser1.retainAll(friendsOfUser2);
+        return friendsOfUser1; // Возвращаем список общих друзей
     }
-
 
     // POST - НОВЫЙ ПОЛЬЗОВАТЕЛЬ
     public User create(User user) {
@@ -81,17 +65,14 @@ public class UserService {
     // PUT - В СПИСОК ДРУЗЕЙ ПОЛЬЗОВАТЕЛЯ
     public User addNewFriend(int id, int friendId) {
         log.info("Взаимное добавление нового друга для пользователя {}: {}", id, friendId);
-        User user = userStorage.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь с данным id (" + id + ") не найден"));
-        User friend = userStorage.findById(friendId)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь с данным id (" + friendId + ") не найден"));
+        User user = findById(id);
+        User friend = findById(friendId);
         user.getFriends().add(friendId);
         friend.getFriends().add(id); // Взаимная дружба
         userStorage.update(user);
         userStorage.update(friend); // Обновляем и друга
         return user;
     }
-
 
     // DELETE - ПОЛЬЗОВАТЕЛЯ ПО id
     public void delete(int id) {
@@ -100,10 +81,8 @@ public class UserService {
 
     // DELETE - ИЗ СПИСКА ДРУЗЕЙ ПОЛЬЗОВАТЕЛЯ
     public User deleteFriend(int id, int friendId) {
-        User currentUser = userStorage.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь с данным id (" + id + ") не найден"));
-        User friendUser = userStorage.findById(friendId)
-                .orElseThrow(() -> new UserNotFoundException("Пользователь с данным id (" + friendId + ") не найден"));
+        User currentUser = findById(id);
+        User friendUser = findById(friendId);
         currentUser.getFriends().remove(friendId);
         friendUser.getFriends().remove(id);
         return userStorage.update(currentUser);

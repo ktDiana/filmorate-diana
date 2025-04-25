@@ -1,13 +1,13 @@
 package com.practice.filmorate.controller;
 
 public class ExceptionResponse {
-    private final String exception;
+    private final String error;
 
     public ExceptionResponse(String error) {
-        this.exception = error;
+        this.error = error;
     }
 
     public String getError() {
-        return exception;
+        return error;
     }
 }

@@ -6,7 +6,6 @@ import com.practice.filmorate.model.User;
 import com.practice.filmorate.storage.UserStorage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Optional;
@@ -18,8 +17,7 @@ import java.util.Optional;
 
 @Component
 @Slf4j
-
-public class InMemoryUserStorage implements UserStorage {
+public class UserDbStorage implements UserStorage {
 
     private final HashMap<Integer, User> users = new HashMap<>();
     private int uniqueId = 1;
@@ -31,12 +29,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public Optional<User> findById(int id) {
-        for (User user : users.values()) {
-            if (user.getId() == id) {
-                return Optional.of(user);
-            }
-        }
-        return Optional.empty();
+        return Optional.ofNullable(users.get(id));
     }
 
     @Override

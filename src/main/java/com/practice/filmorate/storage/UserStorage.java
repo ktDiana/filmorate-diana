@@ -3,7 +3,6 @@ package com.practice.filmorate.storage;
 import com.practice.filmorate.model.User;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 // Создайте интерфейсы FilmStorage и UserStorage, в которых будут определены методы добавления, удаления и модификации объектов.

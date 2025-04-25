@@ -3,16 +3,18 @@ package com.practice.filmorate.controller;
 import com.practice.filmorate.model.Film;
 import com.practice.filmorate.service.FilmService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
 @RequestMapping("/films")
+
 public class FilmController {
+
     private final FilmService filmService;
 
-    // КОНСТРУКТОР
     @Autowired
     public FilmController(FilmService filmService) {
         this.filmService = filmService;
@@ -26,13 +28,13 @@ public class FilmController {
 
     // GET - КОНКРЕТНЫЙ ФИЛЬМ (ПО id)
     @GetMapping("/{id}")
-    public Optional<Film> findById(@PathVariable int id) {
+    public Film findById(@PathVariable int id) {
         return filmService.findById(id);
     }
 
     // GET - СПИСОК ПОПУЛЯРНЫХ ФИЛЬМОВ
-    @GetMapping("/popular?count={count}")
-    public List<Film> findAllPopular(@PathVariable int count) {
+    @GetMapping("/popular")
+    public List<Film> findAllPopular(@RequestParam(defaultValue = "10") int count) {
         return filmService.findAllPopular(count);
     }
 

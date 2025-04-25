@@ -3,20 +3,17 @@ package com.practice.filmorate.controller;
 import com.practice.filmorate.model.User;
 import com.practice.filmorate.service.UserService;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
 @RequestMapping("/users")
-public class UserController {
-    private final UserService userService;
+@RequiredArgsConstructor
 
-    // КОНСТРУКТОР
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
+public class UserController {
+
+    private final UserService userService;
 
     // GET - СПИСОК ВСЕХ ПОЛЬЗОВАТЕЛЕЙ
     @GetMapping
@@ -25,7 +22,8 @@ public class UserController {
     }
 
     // GET - КОНКРЕТНЫЙ ПОЛЬЗОВАТЕЛЬ (ПО id)
-    public Optional<User> findById(int id) {
+    @GetMapping("/{id}")
+    public User findById(@PathVariable int id) {
         return userService.findById(id);
     }
 
@@ -37,7 +35,7 @@ public class UserController {
 
     // GET - СПИСОК ОБЩИХ ДРУЗЕЙ С ДРУГИМ ПОЛЬЗОВАТЕЛЕМ
     @GetMapping("/{id}/friends/common/{otherId}")
-    public List<User> findCommonFriends(@PathVariable int id, @PathVariable int otherId) {
+    public Set<User> findCommonFriends(@PathVariable int id, @PathVariable int otherId) {
         return userService.findCommonFriends(id, otherId);
     }
 

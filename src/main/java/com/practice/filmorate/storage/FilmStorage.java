@@ -1,12 +1,9 @@
 package com.practice.filmorate.storage;
 
 import com.practice.filmorate.model.Film;
-
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-
-// Создайте интерфейсы FilmStorage и UserStorage, в которых будут определены методы добавления, удаления и модификации объектов.
 
 public interface FilmStorage {
 
@@ -18,6 +15,8 @@ public interface FilmStorage {
 
     Film update(Film film);
 
-    void delete(int id);
+    void deleteFilm(int id);
+
+    List<Film> findAllPopular(int count);
 
 }
