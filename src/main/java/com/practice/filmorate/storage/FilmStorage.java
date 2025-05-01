@@ -11,12 +11,14 @@ public interface FilmStorage {
 
     Optional<Film> findById(int id);
 
+    List<Film> findPopular(int count);
+
+    boolean existsById(int id);
+
     Film create(Film film);
 
     Film update(Film film);
 
     void deleteFilm(int id);
-
-    List<Film> findAllPopular(int count);
 
 }

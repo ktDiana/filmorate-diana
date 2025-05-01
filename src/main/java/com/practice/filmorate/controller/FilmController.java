@@ -5,11 +5,14 @@ import com.practice.filmorate.service.FilmService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
 @RequestMapping("/films")
+@Validated
 
 public class FilmController {
 
@@ -34,12 +37,13 @@ public class FilmController {
 
     // GET - СПИСОК ПОПУЛЯРНЫХ ФИЛЬМОВ
     @GetMapping("/popular")
-    public List<Film> findAllPopular(@RequestParam(defaultValue = "10") int count) {
-        return filmService.findAllPopular(count);
+    public List<Film> findPopular(@RequestParam(defaultValue = "10") int count) {
+        return filmService.findPopular(count);
     }
 
     // POST - НОВЫЙ ФИЛЬМ
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public Film create(@Valid @RequestBody Film film) {
         return filmService.create(film);
     }
@@ -58,7 +62,7 @@ public class FilmController {
 
     // DELETE - ФИЛЬМ
     @DeleteMapping("/{id}")
-    public void removeLike(@PathVariable int id) {
+    public void deleteFilm(@PathVariable int id) {
         filmService.delete(id);
     }
 

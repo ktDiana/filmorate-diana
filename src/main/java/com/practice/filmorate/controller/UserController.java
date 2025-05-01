@@ -3,17 +3,21 @@ package com.practice.filmorate.controller;
 import com.practice.filmorate.model.User;
 import com.practice.filmorate.service.UserService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
 @RequestMapping("/users")
-@RequiredArgsConstructor
 
 public class UserController {
 
     private final UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     // GET - СПИСОК ВСЕХ ПОЛЬЗОВАТЕЛЕЙ
     @GetMapping
@@ -29,13 +33,13 @@ public class UserController {
 
     // GET - СПИСОК ДРУЗЕЙ (ПО id ПОЛЬЗОВАТЕЛЯ)
     @GetMapping("/{id}/friends")
-    public List<User> findAllFriends(@PathVariable int id) {
-        return userService.findAllFriends(id);
+    public Collection<User> findAllFriends(@PathVariable int id) {
+        return userService.findFriends(id);
     }
 
     // GET - СПИСОК ОБЩИХ ДРУЗЕЙ С ДРУГИМ ПОЛЬЗОВАТЕЛЕМ
     @GetMapping("/{id}/friends/common/{otherId}")
-    public Set<User> findCommonFriends(@PathVariable int id, @PathVariable int otherId) {
+    public Collection<User> findCommonFriends(@PathVariable int id, @PathVariable int otherId) {
         return userService.findCommonFriends(id, otherId);
     }
 
@@ -53,8 +57,13 @@ public class UserController {
 
     // PUT - В СПИСОК ДРУЗЕЙ ПОЛЬЗОВАТЕЛЯ
     @PutMapping("/{id}/friends/{friendId}")
-    public User addNewFriend(@PathVariable int id, @PathVariable int friendId) {
-        return userService.addNewFriend(id, friendId);
+    public void addFriend(@PathVariable int id, @PathVariable int friendId) {
+        userService.addFriend(id, friendId);
+    }
+
+    @PutMapping("/{id}/friends/{friendId}/confirm")
+    public void confirmFriend(@PathVariable int id, @PathVariable int friendId) {
+        userService.confirmFriend(id, friendId);
     }
 
     // DELETE - ПОЛЬЗОВАТЕЛЯ ПО id
@@ -65,8 +74,8 @@ public class UserController {
 
     // DELETE - ИЗ СПИСКА ДРУЗЕЙ ПОЛЬЗОВАТЕЛЯ
     @DeleteMapping("/{id}/friends/{friendId}")
-    public User deleteFriend(@PathVariable int id, @PathVariable int friendId) {
-        return userService.deleteFriend(id, friendId);
+    public void deleteFriend(@PathVariable int id, @PathVariable int friendId) {
+        userService.deleteFriend(id, friendId);
     }
 
 }

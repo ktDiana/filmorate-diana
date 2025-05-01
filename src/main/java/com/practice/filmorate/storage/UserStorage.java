@@ -13,10 +13,21 @@ public interface UserStorage {
 
     Optional<User> findById(int id);
 
+    boolean existsById(int id);
+
     User create(User user);
 
     User update(User user);
 
     void delete(int id);
 
+    void addFriend(int userId, int friendId);
+
+    void confirmFriend(int userId, int friendId);
+
+    void removeFriend(int userId, int friendId);
+
+    Collection<User> findFriends(int userId);
+
+    Collection<User> findCommonFriends(int userId, int friendId);
 }

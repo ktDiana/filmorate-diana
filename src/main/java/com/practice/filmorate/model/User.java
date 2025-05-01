@@ -5,9 +5,10 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
-import java.util.Set;
 
-@Data   // @EqualsAndHashCode, @Getter, @Setter, @RequiredArgsConstructor, @ToString
+//@Data   // @EqualsAndHashCode, @Getter, @Setter, @RequiredArgsConstructor, @ToString
+@Getter
+@Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,29 +17,24 @@ public class User {
 
     int id;
 
-    @NotBlank
-    @Email
+    @NotBlank(message = "Поле email не должно быть пустым")
+    @Email(message = "Электронная почта должна содержать символ @")
     String email;
 
-    @NotBlank
-    @Pattern(regexp = "\\S+")
+    @NotBlank(message = "Поле login не должно быть пустым")
+    @Pattern(regexp = "\\S+", message = "Логин пользователя не может содержать пробелы")
     String login;
 
     // если имя пустое - используем логин - Service
     String name;
 
+    @NotNull(message = "Дата рождения пользователя не должно быть пустым")
     @PastOrPresent(message = "Дата рождения не может быть в будущем")
     LocalDate birthday;
 
-    Set<Integer> friends;      // идентификаторы пользователей-друзей
-
-    public User(int id, String email, String login, String name, LocalDate birthday) {
-        this.id = id;
-        this.email = email;
-        this.login = login;
-        this.name = name;
-        this.birthday = birthday;
-    }
+    // Убрала это поле, потому что мы полагаемся на данные из БД user_friends
+    // я надеюсь(((((((((((((
+    // Set<Integer> friends = new HashSet<>();      // идентификаторы пользователей-друзей
 
     public void setName(String name) {
         this.name = (name == null || name.isBlank()) ? this.login : name.trim(); // тернарный оператор -> установка имени
