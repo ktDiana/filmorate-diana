@@ -29,7 +29,7 @@ values ('Побег из Шоушенка', 'История побега', '1994
 
 insert into film_genres (film_id, genre_id)
 values (1, 2), --- Побег из Шоушенка – Драма
-       (2, 2); --- Интерстеллар – Фантастика
+       (2, 2); --- Интерстеллар – Драма (из-за постман изменила жанры)
 
 insert into users (email, login, name, birthday)
 values ('diana31@java.com', 'diana', 'Diana', '2002-01-31'),
